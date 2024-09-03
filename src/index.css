@@ -11,3 +11,142 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+.card {
+  border: none; /* Remove default border */
+  transition: transform 0.2s; /* Smooth transition for hover effect */
+}
+
+.card:hover {
+  transform: scale(1.05); /* Slightly enlarge the card on hover */
+}
+
+.card-title {
+  font-size: 1.5rem; /* Increase font size for the title */
+}
+
+.card-text {
+  font-size: 1rem; /* Adjust font size for the text */
+}
+
+.container {
+  max-width: 1200px; /* Limit the maximum width of the container */
+}
+
+
+body {
+  background-color: #f8f9fa;
+}
+
+.card {
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card-body {
+  height: 120px;
+}
+
+.fa-icon {
+  color: #ffa500;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+h1 {
+  color: #333;
+}
+
+.card {
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.transition-button {
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.transition-button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+
+
+.menu-card {
+  width: 500px;
+  height: 500px;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.menu-card:hover {
+  transform: scale(1.05);
+}
+
+.menu-card .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.menu-card .card-title {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+
+
+.square-card-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* Cela crée un rapport d'aspect 1:1 */
+}
+
+.square-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.square-card:hover {
+  transform: scale(1.05);
+}
+
+.square-card .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+.square-card .card-title {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
