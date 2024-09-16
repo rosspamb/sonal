@@ -1,12 +1,13 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Row, Col, Form, Table, Modal } from 'react-bootstrap';
 import Select from 'react-select';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import axios from 'axios';
 
 const equipmentOptions = [
   { value: 'Ordinateur', label: 'Ordinateur' },
@@ -153,13 +154,9 @@ const centresEspacesOptions = [
   { value: 'Agence Kinkole', label: 'Agence Kinkole' },
 ];
 
+
 const Ordinateur = () => {
-  const [computers, setComputers] = useState([
-    { id: 1, marque: 'Dell', type: 'Laptop', processeur: 'Intel i7', disqueDur: '1TB SSD', memoire: '16GB', dateAchat: '2023-01-15', numSerie: 'ABC123', entite: 'Kinshasa', direction: 'Technique', secteurReseau: 'Funa', centreEspace: 'Agence Barumbu (30)' },
-    { id: 2, marque: 'HP', type: 'Desktop', processeur: 'AMD Ryzen 5', disqueDur: '2TB HDD', memoire: '32GB', dateAchat: '2022-11-30', numSerie: 'DEF456', entite: 'Kongo central', direction: 'Commerciale', secteurReseau: 'Lukunga', centreEspace: 'Agence Gombe (33)' },
-    { id: 3, marque: 'Lenovo', type: 'Laptop', processeur: 'Intel i5', disqueDur: '512GB SSD', memoire: '8GB', dateAchat: '2023-03-22', numSerie: 'GHI789', entite: 'Kinshasa', direction: 'Technique', secteurReseau: 'Mont-Amba', centreEspace: 'Agence Lemba (39)' },
-  ]);
-  
+  const [computers, setComputers] = useState([]);
   const [newComputer, setNewComputer] = useState({
     marque: '',
     type: '',
@@ -176,53 +173,118 @@ const Ordinateur = () => {
   });
 
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
+  useEffect(() => {
+    fetchComputers();
+  }, []);
+
+  const fetchComputers = async () => {
+    try {
+      const response = await axios.get('https://api-ango.vercel.app/api/v1/computer');
+      setComputers(response.data.data);
+    } catch (error) {
+      console.error('Error fetching computers:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewComputer({ ...newComputer, [name]: value });
   };
 
-  const handleEquipmentTypeChange = (selectedOption) => {
-    setNewComputer({ ...newComputer, equipmentType: selectedOption });
+  const handleSelectChange = (name, selectedOption) => {
+    setNewComputer({ ...newComputer, [name]: selectedOption });
   };
 
-  const handleEntityChange = (selectedOption) => {
-    setNewComputer({ ...newComputer, entite: selectedOption });
-  };
-
-  const handleDirectionChange = (selectedOption) => {
-    setNewComputer({ ...newComputer, direction: selectedOption });
-  };
-
-  const handleSecteurReseauChange = (selectedOption) => {
-    setNewComputer({ ...newComputer, secteurReseau: selectedOption });
-  };
-
-  const handleCentreEspaceChange = (selectedOption) => {
-    setNewComputer({ ...newComputer, centreEspace: selectedOption });
-  };
-
-  const addComputer = () => {
+  const addOrUpdateComputer = async () => {
     if (newComputer.marque && newComputer.dateAchat && newComputer.numSerie && newComputer.equipmentType && newComputer.entite && newComputer.direction && newComputer.secteurReseau && newComputer.centreEspace) {
-      const newId = computers.length ? computers[computers.length - 1].id + 1 : 1;
-      setComputers([...computers, { 
-        id: newId, 
-        ...newComputer, 
-        equipmentType: newComputer.equipmentType.value, 
-        entite: newComputer.entite.value,
-        direction: newComputer.direction.value,
-        secteurReseau: newComputer.secteurReseau.value,
-        centreEspace: newComputer.centreEspace.value
-      }]);
-      setNewComputer({ marque: '', type: '', processeur: '', disqueDur: '', memoire: '', dateAchat: '', numSerie: '', equipmentType: null, entite: null, direction: null, secteurReseau: null, centreEspace: null });
-      setShowModal(false);
+      try {
+        const computerData = {
+          ...newComputer,
+          equipmentType: newComputer.equipmentType.value,
+          entite: newComputer.entite.value,
+          direction: newComputer.direction.value,
+          secteurReseau: newComputer.secteurReseau.value,
+          centreEspace: newComputer.centreEspace.value
+        };
+        
+        if (isEditing) {
+          await axios.put(`https://api-ango.vercel.app/api/v1/computer/${editingId}`, computerData);
+        } else {
+          await axios.post('https://api-ango.vercel.app/api/v1/computer', computerData);
+        }
+        
+        fetchComputers();
+        resetForm();
+        setShowModal(false);
+      } catch (error) {
+        console.error('Error adding/updating computer:', error);
+        alert('Une erreur est survenue lors de l\'ajout/modification de l\'ordinateur.');
+      }
     } else {
-      alert("Veuillez remplir tous les champs obligatoires (Marque, Date d'achat, N° Série, Type d'équipement, Entité, Direction, Secteur-Réseau, Centre/Espace).");
+      alert("Veuillez remplir tous les champs obligatoires.");
     }
   };
 
-  const handleShowModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  const deleteComputer = async (id) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet équipement ?")) {
+      try {
+        await axios.delete(`https://api-ango.vercel.app/api/v1/computer/${id}`);
+        fetchComputers();
+        alert("L'équipement a été supprimé avec succès.");
+      } catch (error) {
+        console.error('Error deleting computer:', error);
+        alert("Une erreur est survenue lors de la suppression de l'équipement.");
+      }
+    }
+  };
+
+  const handleShowModal = () => {
+    setIsEditing(false);
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    resetForm();
+  };
+
+  const handleEdit = (computer) => {
+    setIsEditing(true);
+    setEditingId(computer._id);
+    setNewComputer({
+      ...computer,
+      equipmentType: { value: computer.equipmentType, label: computer.equipmentType },
+      entite: { value: computer.entite, label: computer.entite },
+      direction: { value: computer.direction, label: computer.direction },
+      secteurReseau: { value: computer.secteurReseau, label: computer.secteurReseau },
+      centreEspace: { value: computer.centreEspace, label: computer.centreEspace },
+      dateAchat: new Date(computer.dateAchat).toISOString().split('T')[0]
+    });
+    setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setNewComputer({
+      marque: '',
+      type: '',
+      processeur: '',
+      disqueDur: '',
+      memoire: '',
+      dateAchat: '',
+      numSerie: '',
+      equipmentType: null,
+      entite: null,
+      direction: null,
+      secteurReseau: null,
+      centreEspace: null
+    });
+    setIsEditing(false);
+    setEditingId(null);
+  };
 
   const exportToExcel = () => {
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
@@ -235,55 +297,82 @@ const Ordinateur = () => {
     saveAs(data, 'ordinateurs' + fileExtension);
   };
 
+  // Options pour les champs Select
+  const equipmentOptions = [
+    { value: 'Ordinateur', label: 'Ordinateur' },
+    { value: 'Imprimante', label: 'Imprimante' },
+    { value: 'Routeur', label: 'Routeur' },
+    { value: 'Modem', label: 'Modem' },
+    { value: 'Onduleur', label: 'Onduleur' },
+    { value: 'Antivirus', label: 'Antivirus' },
+    { value: 'Autres terminaux', label: 'Autres terminaux' }
+  ];
+
+  const entityOptions = [
+    { value: 'Kinshasa', label: 'Kinshasa' },
+    { value: 'Kongo central', label: 'Kongo central' },
+  ];
+
+  const directionOptions = [
+    { value: 'Technique', label: 'Technique' },
+    { value: 'Commerciale', label: 'Commerciale' },
+  ];
+
+  const secteurReseauOptions = [
+    { value: 'Mont-Amba', label: 'Mont-Amba' },
+    { value: 'Funa', label: 'Funa' },
+    { value: 'Lukunga', label: 'Lukunga' },
+  ];
+
+  const centresEspacesOptions = [
+    { value: 'Agence Matete (43)', label: 'Agence Matete (43)' },
+    { value: 'Agence Barumbu (30)', label: 'Agence Barumbu (30)' },
+    { value: 'Agence Gombe (33)', label: 'Agence Gombe (33)' },
+    { value: 'Agence Lemba (39)', label: 'Agence Lemba (39)' },
+  ];
+
   return (
     <Container className="mt-5">
       <h1 className="text-center mb-4">Identification des équipements informatiques</h1>
       <Row>
         <Col>
-          {/* <h2>Liste des équipements informatiques</h2> */}
           <Table striped bordered hover>
             <thead>
               <tr>
-                <th className='text-xs'>ID</th>
-                <th className='text-xs'>Marque</th>
-                <th className='text-xs'>Type</th>
-                <th className='text-xs'>Processeur</th>
-                <th className='text-xs'>Disque Dur</th>
-                <th className='text-xs'>Mémoire</th>
-                <th className='text-xs'>Date d'achat</th>
-                <th className='text-xs'>N° Série</th>
-                <th className='text-xs'>Type d'équipement</th>
-                <th className='text-xs'>Entité</th>
-                <th className='text-xs'>Direction</th>
-                <th className='text-xs'>Secteur-Réseau</th>
-                <th className='text-xs'>Centre/Espace</th>
-                <th className='text-xs'>Actions</th>
+                <th>N</th>
+                <th>Marque</th>
+                <th>Type</th>
+                <th>Processeur</th>
+                <th>Disque Dur</th>
+                <th>Mémoire</th>
+                <th>Date d'achat</th>
+                <th>Numéro de série</th>
+                <th>Type d'équipement</th>
+                <th>Entité</th>
+                <th>Direction</th>
+                <th>Secteur-Réseau</th>
+                <th>Centre/Espace</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {computers.map((computer) => (
-                <tr key={computer.id}>
-                  <td>{computer.id}</td>
+              {computers.map((computer, index) => (
+                <tr key={computer._id}>
+                  <td>{index+1}</td>
                   <td>{computer.marque}</td>
                   <td>{computer.type}</td>
                   <td>{computer.processeur}</td>
                   <td>{computer.disqueDur}</td>
                   <td>{computer.memoire}</td>
-                  <td>{computer.dateAchat}</td>
+                  <td>{new Date(computer.dateAchat).toLocaleDateString()}</td>
                   <td>{computer.numSerie}</td>
                   <td>{computer.equipmentType}</td>
                   <td>{computer.entite}</td>
                   <td>{computer.direction}</td>
                   <td>{computer.secteurReseau}</td>
                   <td>{computer.centreEspace}</td>
-                  <td>
-                  <Button variant="link" className="p-0 me-2" title="Modifier">
-            <FaEdit className="text-primary" />
-          </Button>
-          <Button variant="link" className="p-0" title="Supprimer">
-            <FaTrashAlt className="text-danger" />
-          </Button>
-                  </td>
+                  {/* <td><Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleEdit(computer)}><FaEdit /></Button><Button variant="outline-danger" size="sm" onClick={() => deleteComputer(computer._id)}><FaTrashAlt /></Button></td> */}
+                  <td><FaEdit className='text-primary me-2' size={20} onClick={() => handleEdit(computer)} style={{cursor: 'pointer'}} /><FaTrashAlt className="text-danger" color='red' size={20} onClick={() => deleteComputer(computer._id)} style={{cursor: 'pointer'}} /></td>
                 </tr>
               ))}
             </tbody>
@@ -295,7 +384,7 @@ const Ordinateur = () => {
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Ajouter un équipement</Modal.Title>
+          <Modal.Title>{isEditing ? 'Modifier un équipement' : 'Ajouter un équipement'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -324,7 +413,7 @@ const Ordinateur = () => {
               <Col>
                 <Form.Group>
                   <Form.Label>Disque Dur</Form.Label>
-                  <Form.Control type="text" name="disqueDur" value={newComputer.disqueDur} onChange={handleInputChange} placeholder="Entrez le disque dur" />
+                  <Form.Control type="text" name="disqueDur" value={newComputer.disqueDur} onChange={handleInputChange} placeholder="Entrez la capacité du disque dur" />
                 </Form.Group>
               </Col>
             </Row>
@@ -333,7 +422,7 @@ const Ordinateur = () => {
               <Col>
                 <Form.Group>
                   <Form.Label>Mémoire</Form.Label>
-                  <Form.Control type="text" name="memoire" value={newComputer.memoire} onChange={handleInputChange} placeholder="Entrez la mémoire" />
+                  <Form.Control type="text" name="memoire" value={newComputer.memoire} onChange={handleInputChange} placeholder="Entrez la capacité de la mémoire" />
                 </Form.Group>
               </Col>
               <Col>
@@ -347,43 +436,32 @@ const Ordinateur = () => {
             <Row className="mb-3">
               <Col>
                 <Form.Group>
-                  <Form.Label>N° Série *</Form.Label>
+                  <Form.Label>Numéro de série *</Form.Label>
                   <Form.Control type="text" name="numSerie" value={newComputer.numSerie} onChange={handleInputChange} placeholder="Entrez le numéro de série" required />
                 </Form.Group>
               </Col>
+            </Row>
+
+            <Row className="mb-3">
               <Col>
                 <Form.Group>
                   <Form.Label>Type d'équipement *</Form.Label>
                   <Select
                     value={newComputer.equipmentType}
-                    onChange={handleEquipmentTypeChange}
+                    onChange={(selectedOption) => handleSelectChange('equipmentType', selectedOption)}
                     options={equipmentOptions}
                     placeholder="Sélectionnez un type d'équipement"
                   />
                 </Form.Group>
               </Col>
-            </Row>
-
-            <Row className="mb-3">
               <Col>
                 <Form.Group>
                   <Form.Label>Entité *</Form.Label>
                   <Select
                     value={newComputer.entite}
-                    onChange={handleEntityChange}
+                    onChange={(selectedOption) => handleSelectChange('entite', selectedOption)}
                     options={entityOptions}
                     placeholder="Sélectionnez une entité"
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Direction *</Form.Label>
-                  <Select
-                    value={newComputer.direction}
-                    onChange={handleDirectionChange}
-                    options={directionOptions}
-                    placeholder="Sélectionnez une direction"
                   />
                 </Form.Group>
               </Col>
@@ -392,21 +470,35 @@ const Ordinateur = () => {
             <Row className="mb-3">
               <Col>
                 <Form.Group>
-                  <Form.Label>Secteur-Réseau *</Form.Label>
+                  <Form.Label>Direction *</Form.Label>
                   <Select
-                    value={newComputer.secteurReseau}
-                    onChange={handleSecteurReseauChange}
-                    options={secteurReseauOptions}
-                    placeholder="Sélectionnez un secteur-réseau"
+                    value={newComputer.direction}
+                    onChange={(selectedOption) => handleSelectChange('direction', selectedOption)}
+                    options={directionOptions}
+                    placeholder="Sélectionnez une direction"
                   />
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group>
+                  <Form.Label>Secteur-Réseau *</Form.Label>
+                  <Select
+                    value={newComputer.secteurReseau}
+                    onChange={(selectedOption) => handleSelectChange('secteurReseau', selectedOption)}
+                    options={secteurReseauOptions}
+                    placeholder="Sélectionnez un secteur-réseau"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col>
+                <Form.Group>
                   <Form.Label>Centre/Espace *</Form.Label>
                   <Select
                     value={newComputer.centreEspace}
-                    onChange={handleCentreEspaceChange}
+                    onChange={(selectedOption) => handleSelectChange('centreEspace', selectedOption)}
                     options={centresEspacesOptions}
                     placeholder="Sélectionnez un centre/espace"
                   />
@@ -419,8 +511,8 @@ const Ordinateur = () => {
           <Button variant="secondary" onClick={handleCloseModal}>
             Annuler
           </Button>
-          <Button variant="success" onClick={addComputer}>
-            Ajouter
+          <Button variant="success" onClick={addOrUpdateComputer}>
+            {isEditing ? 'Modifier' : 'Ajouter'}
           </Button>
         </Modal.Footer>
       </Modal>
