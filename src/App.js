@@ -84,7 +84,7 @@ const App = () => {
 
 const Home = () => {
   const menuItems = [
-    { icon: faLaptop, title: "Ordinateur", path: "/ordinateur" },
+    { icon: faLaptop, title: "Equipements", path: "/ordinateur" },
     { icon: faChartLine, title: "Mouvement des Ordi", path: "/mouvement" },
   ];
 
