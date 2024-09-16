@@ -297,40 +297,6 @@ const Ordinateur = () => {
     saveAs(data, 'ordinateurs' + fileExtension);
   };
 
-  // Options pour les champs Select
-  const equipmentOptions = [
-    { value: 'Ordinateur', label: 'Ordinateur' },
-    { value: 'Imprimante', label: 'Imprimante' },
-    { value: 'Routeur', label: 'Routeur' },
-    { value: 'Modem', label: 'Modem' },
-    { value: 'Onduleur', label: 'Onduleur' },
-    { value: 'Antivirus', label: 'Antivirus' },
-    { value: 'Autres terminaux', label: 'Autres terminaux' }
-  ];
-
-  const entityOptions = [
-    { value: 'Kinshasa', label: 'Kinshasa' },
-    { value: 'Kongo central', label: 'Kongo central' },
-  ];
-
-  const directionOptions = [
-    { value: 'Technique', label: 'Technique' },
-    { value: 'Commerciale', label: 'Commerciale' },
-  ];
-
-  const secteurReseauOptions = [
-    { value: 'Mont-Amba', label: 'Mont-Amba' },
-    { value: 'Funa', label: 'Funa' },
-    { value: 'Lukunga', label: 'Lukunga' },
-  ];
-
-  const centresEspacesOptions = [
-    { value: 'Agence Matete (43)', label: 'Agence Matete (43)' },
-    { value: 'Agence Barumbu (30)', label: 'Agence Barumbu (30)' },
-    { value: 'Agence Gombe (33)', label: 'Agence Gombe (33)' },
-    { value: 'Agence Lemba (39)', label: 'Agence Lemba (39)' },
-  ];
-
   return (
     <Container className="mt-5">
       <h1 className="text-center mb-4">Identification des équipements informatiques</h1>
