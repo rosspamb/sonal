@@ -213,13 +213,13 @@ const Ordinateur = () => {
           secteurReseau: newComputer.secteurReseau.value,
           centreEspace: newComputer.centreEspace.value
         };
-        
+
         if (isEditing) {
           await axios.put(`https://api-ango.vercel.app/api/v1/computer/${editingId}`, computerData);
         } else {
           await axios.post('https://api-ango.vercel.app/api/v1/computer', computerData);
         }
-        
+
         fetchComputers();
         resetForm();
         setShowModal(false);
@@ -366,6 +366,56 @@ const Ordinateur = () => {
         </Modal.Header>
         <Modal.Body>
           <Form>
+
+            <Row className="mb-3">
+              <Col>
+                <Form.Group>
+                  <Form.Label>Entité *</Form.Label>
+                  <Select
+                    value={newComputer.entite}
+                    onChange={(selectedOption) => handleSelectChange('entite', selectedOption)}
+                    options={entityOptions}
+                    placeholder="Sélectionnez une entité"
+                  />
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group>
+                  <Form.Label>Direction *</Form.Label>
+                  <Select
+                    value={newComputer.direction}
+                    onChange={(selectedOption) => handleSelectChange('direction', selectedOption)}
+                    options={directionOptions}
+                    placeholder="Sélectionnez une direction"
+                  />
+                </Form.Group>
+              </Col>
+
+            </Row>
+            <Row className="mb-3">
+              <Col>
+                <Form.Group>
+                  <Form.Label>Secteur-Réseau *</Form.Label>
+                  <Select
+                    value={newComputer.secteurReseau}
+                    onChange={(selectedOption) => handleSelectChange('secteurReseau', selectedOption)}
+                    options={secteurReseauOptions}
+                    placeholder="Sélectionnez un secteur-réseau"
+                  />
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group>
+                  <Form.Label>Centre/Espace *</Form.Label>
+                  <Select
+                    value={newComputer.centreEspace}
+                    onChange={(selectedOption) => handleSelectChange('centreEspace', selectedOption)}
+                    options={centresEspacesOptions}
+                    placeholder="Sélectionnez un centre/espace"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
             <Row className="mb-3">
               <Col>
                 <Form.Group>
@@ -432,57 +482,9 @@ const Ordinateur = () => {
                   />
                 </Form.Group>
               </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Entité *</Form.Label>
-                  <Select
-                    value={newComputer.entite}
-                    onChange={(selectedOption) => handleSelectChange('entite', selectedOption)}
-                    options={entityOptions}
-                    placeholder="Sélectionnez une entité"
-                  />
-                </Form.Group>
-              </Col>
+
             </Row>
 
-            <Row className="mb-3">
-              <Col>
-                <Form.Group>
-                  <Form.Label>Direction *</Form.Label>
-                  <Select
-                    value={newComputer.direction}
-                    onChange={(selectedOption) => handleSelectChange('direction', selectedOption)}
-                    options={directionOptions}
-                    placeholder="Sélectionnez une direction"
-                  />
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Secteur-Réseau *</Form.Label>
-                  <Select
-                    value={newComputer.secteurReseau}
-                    onChange={(selectedOption) => handleSelectChange('secteurReseau', selectedOption)}
-                    options={secteurReseauOptions}
-                    placeholder="Sélectionnez un secteur-réseau"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row className="mb-3">
-              <Col>
-                <Form.Group>
-                  <Form.Label>Centre/Espace *</Form.Label>
-                  <Select
-                    value={newComputer.centreEspace}
-                    onChange={(selectedOption) => handleSelectChange('centreEspace', selectedOption)}
-                    options={centresEspacesOptions}
-                    placeholder="Sélectionnez un centre/espace"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
           </Form>
         </Modal.Body>
         <Modal.Footer>
