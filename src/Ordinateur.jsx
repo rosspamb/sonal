@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Button, Row, Col, Form, Table, Modal } from 'react-bootstrap';
+import { Container, Card, Button, Row, Col, Form, Table, Modal, Spinner } from 'react-bootstrap';
 import Select from 'react-select';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import * as XLSX from 'xlsx';
@@ -175,17 +175,21 @@ const Ordinateur = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true); // État du loader
 
   useEffect(() => {
     fetchComputers();
   }, []);
 
   const fetchComputers = async () => {
+    setLoading(true); // Démarrer le loader
     try {
       const response = await axios.get('https://api-ango.vercel.app/api/v1/computer');
       setComputers(response.data.data);
     } catch (error) {
       console.error('Error fetching computers:', error);
+    } finally {
+      setLoading(false); // Arrêter le loader
     }
   };
 
@@ -300,53 +304,61 @@ const Ordinateur = () => {
   return (
     <Container className="mt-5">
       <h1 className="text-center mb-4">Identification des équipements informatiques</h1>
-      <Row>
-        <Col>
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>N</th>
-                <th>Marque</th>
-                <th>Type</th>
-                <th>Processeur</th>
-                <th>Disque Dur</th>
-                <th>Mémoire</th>
-                <th>Date d'achat</th>
-                <th>Numéro de série</th>
-                <th>Type d'équipement</th>
-                <th>Entité</th>
-                <th>Direction</th>
-                <th>Secteur-Réseau</th>
-                <th>Centre/Espace</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {computers.map((computer, index) => (
-                <tr key={computer._id}>
-                  <td>{index+1}</td>
-                  <td>{computer.marque}</td>
-                  <td>{computer.type}</td>
-                  <td>{computer.processeur}</td>
-                  <td>{computer.disqueDur}</td>
-                  <td>{computer.memoire}</td>
-                  <td>{new Date(computer.dateAchat).toLocaleDateString()}</td>
-                  <td>{computer.numSerie}</td>
-                  <td>{computer.equipmentType}</td>
-                  <td>{computer.entite}</td>
-                  <td>{computer.direction}</td>
-                  <td>{computer.secteurReseau}</td>
-                  <td>{computer.centreEspace}</td>
-                  {/* <td><Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleEdit(computer)}><FaEdit /></Button><Button variant="outline-danger" size="sm" onClick={() => deleteComputer(computer._id)}><FaTrashAlt /></Button></td> */}
-                  <td><FaEdit className='text-primary me-2' size={20} onClick={() => handleEdit(computer)} style={{cursor: 'pointer'}} /><FaTrashAlt className="text-danger" color='red' size={20} onClick={() => deleteComputer(computer._id)} style={{cursor: 'pointer'}} /></td>
+      {loading ? ( // Affichage du loader
+        <div className="text-center">
+          <Spinner animation="border" />
+        </div>
+      ) : (
+        <Row>
+          <Col>
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>N</th>
+                  <th>Marque</th>
+                  <th>Type</th>
+                  <th>Processeur</th>
+                  <th>Disque Dur</th>
+                  <th>Mémoire</th>
+                  <th>Date d'achat</th>
+                  <th>Numéro de série</th>
+                  <th>Type d'équipement</th>
+                  <th>Entité</th>
+                  <th>Direction</th>
+                  <th>Secteur-Réseau</th>
+                  <th>Centre/Espace</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-          <Button variant="success" onClick={handleShowModal} className="me-2">Ajouter un équipement</Button>
-          <Button variant="primary" onClick={exportToExcel}>Exporter vers Excel</Button>
-        </Col>
-      </Row>
+              </thead>
+              <tbody>
+                {computers.map((computer, index) => (
+                  <tr key={computer._id}>
+                    <td>{index + 1}</td>
+                    <td>{computer.marque}</td>
+                    <td>{computer.type}</td>
+                    <td>{computer.processeur}</td>
+                    <td>{computer.disqueDur}</td>
+                    <td>{computer.memoire}</td>
+                    <td>{new Date(computer.dateAchat).toLocaleDateString()}</td>
+                    <td>{computer.numSerie}</td>
+                    <td>{computer.equipmentType}</td>
+                    <td>{computer.entite}</td>
+                    <td>{computer.direction}</td>
+                    <td>{computer.secteurReseau}</td>
+                    <td>{computer.centreEspace}</td>
+                    <td>
+                      <FaEdit className='text-primary me-2' size={20} onClick={() => handleEdit(computer)} style={{ cursor: 'pointer' }} />
+                      <FaTrashAlt className="text-danger" color='red' size={20} onClick={() => deleteComputer(computer._id)} style={{ cursor: 'pointer' }} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+            <Button variant="success" onClick={handleShowModal} className="me-2">Ajouter un équipement</Button>
+            <Button variant="primary" onClick={exportToExcel}>Exporter vers Excel</Button>
+          </Col>
+        </Row>
+      )}
 
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
